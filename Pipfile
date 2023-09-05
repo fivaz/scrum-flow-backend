@@ -9,6 +9,7 @@ python-dotenv = "*"
 psycopg2 = "*"
 psycopg2-binary = "*"
 django-ninja = "*"
+jiraone = "*"
 
 [dev-packages]
 

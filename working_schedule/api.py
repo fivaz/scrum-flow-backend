@@ -1,6 +1,7 @@
 from typing import List
 
 from django.shortcuts import get_object_or_404
+from jiraone import LOGIN, endpoint
 from ninja import NinjaAPI
 
 from working_schedule.models import WorkingSchedule
@@ -8,35 +9,31 @@ from working_schedule.schema import WorkingScheduleSchema
 
 api = NinjaAPI()
 
+from ninja.security import HttpBearer
 
-@api.get("/working-schedules", response=List[WorkingScheduleSchema])
+
+class JiraAccessToken(HttpBearer):
+    def authenticate(self, request, token):
+        [access_token, cloud_id] = token.split(' ')
+        LOGIN.base_url = f"https://api.atlassian.com/ex/jira/{cloud_id}"
+        LOGIN.token_session(sess=access_token)
+
+        response = LOGIN.get(endpoint.myself())
+
+        if response.status_code == 200:
+            return cloud_id
+
+
+@api.get("/working-schedule", response=List[WorkingScheduleSchema], auth=JiraAccessToken())
 def get(request):
-    return WorkingSchedule.objects.all()
-
-
-@api.get("/working-schedules/{working_schedule_id}", response=WorkingScheduleSchema)
-def get(request, working_schedule_id: int):
-    working_schedule = get_object_or_404(WorkingSchedule, id=working_schedule_id)
+    working_schedule = get_object_or_404(WorkingSchedule, cloud_id=request.auth)
     return working_schedule
 
 
-@api.post("/working-schedules", response={201: WorkingScheduleSchema})
-def create(request, working_schedule: WorkingScheduleSchema):
-    working_schedule = WorkingSchedule.objects.create(**working_schedule.dict())
+@api.post("/working-schedule", response=WorkingScheduleSchema, auth=JiraAccessToken())
+def create(request, payload: WorkingScheduleSchema):
+    working_schedule, created = WorkingSchedule.objects.update_or_create(cloud_id=request.auth, defaults={
+        "start_at": payload.start_at,
+        "end_at": payload.end_at
+    })
     return working_schedule
-
-
-@api.put("/working-schedules/{working_schedule_id}")
-def update_employee(request, working_schedule_id: int, payload: WorkingScheduleSchema):
-    working_schedule = get_object_or_404(WorkingSchedule, id=working_schedule_id)
-    for attr, value in payload.dict().items():
-        setattr(working_schedule, attr, value)
-    working_schedule.save()
-    return {"success": True}
-
-
-@api.delete("/working-schedules/{working_schedule_id}")
-def delete_employee(request, working_schedule_id: int):
-    employee = get_object_or_404(WorkingSchedule, id=working_schedule_id)
-    employee.delete()
-    return {"success": True}
