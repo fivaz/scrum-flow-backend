@@ -21,5 +21,5 @@ from working_schedule.api import api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("working-schedules/", api.urls)
+    path("api/", api.urls)
 ]
