@@ -1,5 +1,3 @@
-from typing import List
-
 from django.shortcuts import get_object_or_404
 from jiraone import LOGIN, endpoint
 from ninja import NinjaAPI
@@ -24,7 +22,7 @@ class JiraAccessToken(HttpBearer):
             return cloud_id
 
 
-@api.get("/working-schedule", response=List[WorkingScheduleSchema], auth=JiraAccessToken())
+@api.get("/working-schedule", response=WorkingScheduleSchema, auth=JiraAccessToken())
 def get(request):
     working_schedule = get_object_or_404(WorkingSchedule, cloud_id=request.auth)
     return working_schedule
