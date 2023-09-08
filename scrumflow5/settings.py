@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "ninja",
     'corsheaders',
-    "working_schedule",
+    "schedule",
 ]
 
 MIDDLEWARE = [

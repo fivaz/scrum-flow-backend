@@ -3,7 +3,7 @@ from datetime import time
 from ninja import Schema
 
 
-class WorkingScheduleSchema(Schema):
+class ScheduleSchema(Schema):
     start_at: time
     end_at: time
 
