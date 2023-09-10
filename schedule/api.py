@@ -1,9 +1,11 @@
+from typing import List
+
 from django.shortcuts import get_object_or_404
 from jiraone import LOGIN, endpoint
 from ninja import NinjaAPI
 
-from schedule.models import Schedule
-from schedule.schema import ScheduleSchema
+from schedule.models import Schedule, User
+from schedule.schema import ScheduleSchema, ScheduleSchemaIn
 
 api = NinjaAPI()
 
@@ -22,52 +24,46 @@ class JiraAccessToken(HttpBearer):
             return cloud_id
 
 
-@api.get("/schedule", response=ScheduleSchema, auth=JiraAccessToken())
+@api.get("/schedule", response=List[ScheduleSchema], auth=JiraAccessToken())
 def get(request):
-    schedule = get_object_or_404(Schedule, cloud_id=request.auth)
-    return schedule
+    user = User.objects.get(cloudId=request.auth)
+    schedules = Schedule.objects.filter(cloudId=user)
+    return schedules.values()
 
 
-@api.get("/schedule/{schedule_id}", response=ScheduleSchema)
+@api.get("/schedule/{schedule_id}", response=ScheduleSchema, auth=JiraAccessToken())
 def get(request, schedule_id: int):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     return schedule
 
 
-# @api.post("/schedule", response=ScheduleSchema, auth=JiraAccessToken())
-# def create(request, schedule: ScheduleSchema):
-#     schedule = Schedule.objects.create(cloud_id=request.auth, defaults={
-#         id: string;
-#         employeeId: string;
-#         startDate: string;
-#         endDate: string;
-#         startTime: string;
-#         endTime: string;
-#         daysOfWeek: number[];
-#         isRecurring: boolean;
-#     })
-#     return schedule
-
-
 @api.post("/schedule", response=ScheduleSchema, auth=JiraAccessToken())
-def create(request, payload: ScheduleSchema):
-    schedule, created = Schedule.objects.update_or_create(cloud_id=request.auth, defaults={
-        "start_at": payload.start_at,
-        "end_at": payload.end_at
-    })
+def create(request, schedule: ScheduleSchemaIn):
+    user, created = User.objects.get_or_create(cloudId=request.auth)
+
+    schedule = Schedule.objects.create(
+        cloudId=user,
+        memberId=schedule.memberId,
+        startDate=schedule.startDate,
+        endDate=schedule.endDate,
+        startTime=schedule.startTime,
+        endTime=schedule.endTime,
+        daysOfWeek=schedule.daysOfWeek,
+        isRecurring=schedule.isRecurring,
+    )
     return schedule
 
 
-@api.put("/schedule/{schedule_id}")
-def update_employee(request, schedule_id: int, payload: ScheduleSchema):
-    schedule = get_object_or_404(Schedule, id=schedule_id)
-    for attr, value in payload.dict().items():
-        setattr(schedule, attr, value)
-    schedule.save()
-    return {"success": True}
+@api.put("/schedule/{schedule_id}", response=ScheduleSchema, auth=JiraAccessToken())
+def update_employee(request, schedule_id: int, new_schedule: ScheduleSchemaIn):
+    existing_schedule = get_object_or_404(Schedule, id=schedule_id)
+    for attr, value in new_schedule.dict().items():
+        setattr(existing_schedule, attr, value)
+    existing_schedule.save()
+    return existing_schedule
 
 
-@api.delete("/schedule/{schedule_id}")
+@api.delete("/schedule/{schedule_id}", auth=JiraAccessToken())
 def delete_employee(request, schedule_id: int):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     schedule.delete()
