@@ -11,6 +11,7 @@ psycopg2-binary = "*"
 django-ninja = "*"
 jiraone = "*"
 django-cors-headers = "*"
+requests = "*"
 
 [dev-packages]
 

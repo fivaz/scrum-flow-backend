@@ -1,5 +1,7 @@
 from typing import List
 
+import requests
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from jiraone import LOGIN, endpoint
 from ninja import NinjaAPI
@@ -24,8 +26,19 @@ class JiraAccessToken(HttpBearer):
             return cloud_id
 
 
+class JiraAccessToken1(HttpBearer):
+    def authenticate(self, request, token):
+        access_token = token.split(' ')
+        return access_token[0]
+
+
 @api.get("/schedule", response=List[ScheduleSchema], auth=JiraAccessToken())
 def get(request):
+    count = cache.get('data_route_count', 0)
+    # Increment the count
+    count += 1
+    cache.set('data_route_count', count)
+    print(f"This route has been called {count} times.")
     user = User.objects.get(cloudId=request.auth)
     schedules = Schedule.objects.filter(cloudId=user)
     return schedules.values()
@@ -68,3 +81,22 @@ def delete_employee(request, schedule_id: int):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     schedule.delete()
     return {"success": True}
+
+
+def fetch_data(token: str):
+    headers = {'Authorization': f'Bearer {token}'}
+    response = requests.get('https://api.atlassian.com/oauth/token/accessible-resources', headers=headers)
+    return response.json()
+
+
+@api.get("/resources", auth=JiraAccessToken1())
+def get_resources(request):
+    # print(request.auth)
+    count = cache.get('data_route_count', 0)
+    # Increment the count
+    count += 1
+    cache.set('data_route_count', count)
+    res = fetch_data(request.auth)
+    print(res)
+    print(f"This route has been called {count} times.")
+    return res
