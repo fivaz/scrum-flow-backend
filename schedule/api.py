@@ -2,83 +2,74 @@ from typing import List
 
 import requests
 from django.core.cache import cache
-from django.shortcuts import get_object_or_404
 from jiraone import LOGIN, endpoint
 from ninja import NinjaAPI
+from ninja.security import HttpBearer
 
 from schedule.models import Schedule, User
-from schedule.schema import ScheduleSchema, ScheduleSchemaIn
+from schedule.schema import ScheduleSchema, model_to_schema, ScheduleSchemaIn, schema_to_model
 
 api = NinjaAPI()
 
-from ninja.security import HttpBearer
+
+def check_token_validity(token: str):
+    [access_token, cloud_id] = token.split(' ')
+    LOGIN.base_url = f"https://api.atlassian.com/ex/jira/{cloud_id}"
+    LOGIN.token_session(sess=access_token)
+
+    response = LOGIN.get(endpoint.myself())
+
+    if response.status_code == 200:
+        return cloud_id
+
+
+class BearerToken(HttpBearer):
+    def authenticate(self, request, token):
+        cloud_id = check_token_validity(token)
+        if cloud_id:
+            user, created = User.objects.get_or_create(cloudId=cloud_id)
+            return user
 
 
 class JiraAccessToken(HttpBearer):
-    def authenticate(self, request, token):
-        [access_token, cloud_id] = token.split(' ')
-        LOGIN.base_url = f"https://api.atlassian.com/ex/jira/{cloud_id}"
-        LOGIN.token_session(sess=access_token)
-
-        response = LOGIN.get(endpoint.myself())
-
-        if response.status_code == 200:
-            return cloud_id
-
-
-class JiraAccessToken1(HttpBearer):
     def authenticate(self, request, token):
         access_token = token.split(' ')
         return access_token[0]
 
 
-@api.get("/schedule", response=List[ScheduleSchema], auth=JiraAccessToken())
-def get(request):
-    count = cache.get('data_route_count', 0)
-    # Increment the count
-    count += 1
-    cache.set('data_route_count', count)
-    print(f"This route has been called {count} times.")
-    user = User.objects.get(cloudId=request.auth)
-    schedules = Schedule.objects.filter(cloudId=user)
-    return schedules.values()
+@api.get("/schedules", response=List[ScheduleSchema], auth=BearerToken())
+def get_schedules(request):
+    schedules = Schedule.objects.filter(user=request.auth)
+    # return schedules
+    return [model_to_schema(schedule) for schedule in schedules]
 
 
-@api.get("/schedule/{schedule_id}", response=ScheduleSchema, auth=JiraAccessToken())
-def get(request, schedule_id: int):
-    schedule = get_object_or_404(Schedule, id=schedule_id)
-    return schedule
+@api.get("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
+def get_schedule(request, schedule_id: int):
+    schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
+    return model_to_schema(schedule)
 
 
-@api.post("/schedule", response=ScheduleSchema, auth=JiraAccessToken())
-def create(request, schedule: ScheduleSchemaIn):
-    user, created = User.objects.get_or_create(cloudId=request.auth)
-
-    schedule = Schedule.objects.create(
-        cloudId=user,
-        memberId=schedule.memberId,
-        startDate=schedule.startDate,
-        endDate=schedule.endDate,
-        startTime=schedule.startTime,
-        endTime=schedule.endTime,
-        daysOfWeek=schedule.daysOfWeek,
-        isRecurring=schedule.isRecurring,
-    )
-    return schedule
+@api.post("/schedules", auth=BearerToken())
+def create_schedule(request, schedule_in: ScheduleSchemaIn):
+    schedule_obj = schema_to_model(schedule_in, request.auth)
+    schedule = Schedule.objects.create(**schedule_obj)
+    return model_to_schema(schedule)
 
 
-@api.put("/schedule/{schedule_id}", response=ScheduleSchema, auth=JiraAccessToken())
-def update_employee(request, schedule_id: int, new_schedule: ScheduleSchemaIn):
-    existing_schedule = get_object_or_404(Schedule, id=schedule_id)
-    for attr, value in new_schedule.dict().items():
-        setattr(existing_schedule, attr, value)
-    existing_schedule.save()
-    return existing_schedule
+@api.put("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
+def update_schedule(request, schedule_id: int, schedule_in: ScheduleSchemaIn):
+    schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
+    new_schedule_obj = schema_to_model(schedule_in, request.auth)
+    for attr, value in new_schedule_obj.items():
+        setattr(schedule, attr, value)
+    schedule.save()
+    return model_to_schema(schedule)
 
 
-@api.delete("/schedule/{schedule_id}", auth=JiraAccessToken())
-def delete_employee(request, schedule_id: int):
-    schedule = get_object_or_404(Schedule, id=schedule_id)
+@api.delete("/schedules/{schedule_id}", auth=BearerToken())
+def delete_schedule(request, schedule_id: int):
+    schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     schedule.delete()
     return {"success": True}
 
@@ -89,7 +80,7 @@ def fetch_data(token: str):
     return response.json()
 
 
-@api.get("/resources", auth=JiraAccessToken1())
+@api.get("/resources", auth=JiraAccessToken())
 def get_resources(request):
     # print(request.auth)
     count = cache.get('data_route_count', 0)

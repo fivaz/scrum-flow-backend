@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -8,10 +9,11 @@ class User(models.Model):
 
 class Schedule(models.Model):
     memberId = models.CharField(max_length=255)
-    startDate = models.DateField()
-    endDate = models.DateField()
-    startTime = models.TimeField()
-    endTime = models.TimeField()
-    daysOfWeek = models.JSONField()
-    isRecurring = models.BooleanField()
-    cloudId = models.ForeignKey(User, on_delete=models.CASCADE, db_column='cloudId')
+    start = models.DateTimeField(null=True, blank=True)
+    end = models.DateTimeField(null=True, blank=True)
+    duration = models.TimeField(null=True, blank=True)
+    freq = models.CharField(max_length=200, null=True, blank=True)
+    byweekday = ArrayField(models.CharField(max_length=3), null=True, blank=True)
+    dtstart = models.DateTimeField(null=True, blank=True)
+    until = models.DateField(null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
