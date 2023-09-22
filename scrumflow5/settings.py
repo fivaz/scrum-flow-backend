@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "ninja",
     'corsheaders',
     "schedule",
+    "prediction",
 ]
 
 MIDDLEWARE = [

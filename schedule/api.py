@@ -3,13 +3,13 @@ from typing import List
 import requests
 from django.core.cache import cache
 from jiraone import LOGIN, endpoint
-from ninja import NinjaAPI
+from ninja import Router
 from ninja.security import HttpBearer
 
 from schedule.models import Schedule, User
 from schedule.schema import ScheduleSchema, model_to_schema, ScheduleSchemaIn, schema_to_model
 
-api = NinjaAPI()
+router = Router()
 
 
 def check_token_validity(token: str):
@@ -37,27 +37,27 @@ class JiraAccessToken(HttpBearer):
         return access_token[0]
 
 
-@api.get("/schedules", response=List[ScheduleSchema], auth=BearerToken())
+@router.get("/", response=List[ScheduleSchema], auth=BearerToken())
 def get_schedules(request):
     schedules = Schedule.objects.filter(user=request.auth)
     # return schedules
     return [model_to_schema(schedule) for schedule in schedules]
 
 
-@api.get("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
+@router.get("/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
 def get_schedule(request, schedule_id: str):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     return model_to_schema(schedule)
 
 
-@api.post("/schedules", auth=BearerToken())
+@router.post("/", auth=BearerToken())
 def create_schedule(request, schedule_in: ScheduleSchemaIn):
     schedule_obj = schema_to_model(schedule_in, request.auth)
     schedule = Schedule.objects.create(**schedule_obj)
     return model_to_schema(schedule)
 
 
-@api.put("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
+@router.put("/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
 def update_schedule(request, schedule_id: str, schedule_in: ScheduleSchemaIn):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     new_schedule_obj = schema_to_model(schedule_in, request.auth)
@@ -67,7 +67,7 @@ def update_schedule(request, schedule_id: str, schedule_in: ScheduleSchemaIn):
     return model_to_schema(schedule)
 
 
-@api.delete("/schedules/{schedule_id}", auth=BearerToken())
+@router.delete("/{schedule_id}", auth=BearerToken())
 def delete_schedule(request, schedule_id: str):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     schedule.delete()
@@ -80,7 +80,7 @@ def fetch_data(token: str):
     return response.json()
 
 
-@api.get("/resources", auth=JiraAccessToken())
+@router.get("/resources", auth=JiraAccessToken())
 def get_resources(request):
     # print(request.auth)
     count = cache.get('data_route_count', 0)
