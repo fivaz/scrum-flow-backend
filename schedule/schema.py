@@ -14,7 +14,7 @@ class RRuleSchema(Schema):
 
 
 class ScheduleSchema(Schema):
-    id: int
+    id: str
     memberId: str
     start: datetime = None
     end: datetime = None
@@ -31,18 +31,22 @@ class ScheduleSchemaIn(Schema):
 
 
 def model_to_schema(schedule: Schedule):
-    return ScheduleSchema(
-        id=schedule.id,
-        memberId=schedule.memberId,
-        start=schedule.start,
-        end=schedule.end,
-        duration=schedule.duration,
-        rrule=RRuleSchema(
+    rrule = None
+    if schedule.freq or schedule.byweekday or schedule.dtstart or schedule.until:
+        rrule = RRuleSchema(
             freq=schedule.freq,
             byweekday=schedule.byweekday,
             dtstart=schedule.dtstart,
             until=schedule.until,
-        ),
+        )
+
+    return ScheduleSchema(
+        id=schedule.id,
+        memberId=schedule.memberId,
+        start=schedule.start if schedule.start else None,
+        end=schedule.end if schedule.end else None,
+        duration=schedule.duration if schedule.duration else None,
+        rrule=rrule,
     )
 
 

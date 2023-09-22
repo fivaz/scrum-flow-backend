@@ -45,7 +45,7 @@ def get_schedules(request):
 
 
 @api.get("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
-def get_schedule(request, schedule_id: int):
+def get_schedule(request, schedule_id: str):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     return model_to_schema(schedule)
 
@@ -58,7 +58,7 @@ def create_schedule(request, schedule_in: ScheduleSchemaIn):
 
 
 @api.put("/schedules/{schedule_id}", response=ScheduleSchema, auth=BearerToken())
-def update_schedule(request, schedule_id: int, schedule_in: ScheduleSchemaIn):
+def update_schedule(request, schedule_id: str, schedule_in: ScheduleSchemaIn):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     new_schedule_obj = schema_to_model(schedule_in, request.auth)
     for attr, value in new_schedule_obj.items():
@@ -68,7 +68,7 @@ def update_schedule(request, schedule_id: int, schedule_in: ScheduleSchemaIn):
 
 
 @api.delete("/schedules/{schedule_id}", auth=BearerToken())
-def delete_schedule(request, schedule_id: int):
+def delete_schedule(request, schedule_id: str):
     schedule = Schedule.objects.get(id=schedule_id, user=request.auth)
     schedule.delete()
     return {"success": True}
