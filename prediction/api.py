@@ -12,34 +12,25 @@ from schedule.api import BearerToken
 router = Router()
 
 
+@router.get("/", response=List[IssueSchema], auth=BearerToken())
+def get_schedules(request):
+    issues = Issue.objects.filter(user=request.auth)
+    return issues.values()
+
+
 @router.post("/", auth=BearerToken())
 def create_issues(request, issues: List[IssueSchema]):
     for issue_data in issues:
-        try:
-            issue = Issue.objects.get(id=issue_data.id, user=request.auth)
-            if issue_data.timeSpent == 0:
-                issue.delete()
-            else:
-                Issue.objects.update(
-                    id=issue_data.id,
-                    defaults={
-                        'estimation': issue_data.estimation,
-                        'timeSpent': issue_data.timeSpent,
-                        'completedDate': issue_data.completedDate,
-                        'user': request.auth,
-                    }
-                )
-        except Issue.DoesNotExist:
-            if issue_data.timeSpent != 0:
-                Issue.objects.create(
-                    id=issue_data.id,
-                    defaults={
-                        'estimation': issue_data.estimation,
-                        'timeSpent': issue_data.timeSpent,
-                        'completedDate': issue_data.completedDate,
-                        'user': request.auth,
-                    }
-                )
+        Issue.objects.update_or_create(
+            id=issue_data.id,
+            defaults={
+                'isUsed': issue_data.isUsed,
+                'estimation': issue_data.estimation,
+                'timeSpent': issue_data.timeSpent,
+                'completedDate': issue_data.completedDate,
+                'user': request.auth,
+            }
+        )
     return {"success": True}
 
 
@@ -56,7 +47,7 @@ def fetch_issues_backlog(board_id: int, access_token: str, cloud_id: str):
 def predict_issues(request, new_issues: List[IssueInSchema]):
     new_issues_with_estimation = [issue for issue in new_issues if issue.estimation is not None]
 
-    issues = Issue.objects.filter(user=request.auth)
+    issues = Issue.objects.filter(user=request.auth, isUsed=True)
 
     new_issues_with_time_spent = make_predictions(issues, new_issues_with_estimation)
     return new_issues_with_time_spent
