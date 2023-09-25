@@ -74,7 +74,7 @@ def delete_schedule(request, schedule_id: str):
     return {"success": True}
 
 
-def fetch_data(token: str):
+def fetch_resources(token: str):
     headers = {'Authorization': f'Bearer {token}'}
     response = requests.get('https://api.atlassian.com/oauth/token/accessible-resources', headers=headers)
     return response.json()
@@ -87,7 +87,7 @@ def get_resources(request):
     # Increment the count
     count += 1
     cache.set('data_route_count', count)
-    res = fetch_data(request.auth)
+    res = fetch_resources(request.auth)
     print(res)
     print(f"This route has been called {count} times.")
     return res
