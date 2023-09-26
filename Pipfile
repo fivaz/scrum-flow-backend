@@ -13,7 +13,6 @@ jiraone = "*"
 django-cors-headers = "*"
 requests = "*"
 scikit-learn = "*"
-sklearn = "*"
 
 [dev-packages]
 

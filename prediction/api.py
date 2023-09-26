@@ -3,7 +3,7 @@ from typing import List
 
 import requests
 from ninja import Router
-from sklearn.linear_model import LinearRegression
+from sklearn import linear_model
 
 from prediction.models import Issue
 from prediction.schema import IssueSchema, IssueInSchema
@@ -31,7 +31,7 @@ def create_issues(request, issues: List[IssueSchema]):
                 'user': request.auth,
             }
         )
-        
+
     return {"success": True}
 
 
@@ -61,7 +61,7 @@ def make_predictions(issues: List[IssueSchema], new_issues: List[IssueInSchema])
     y_train = [issue.timeSpent for issue in issues]
 
     # Train the model
-    model = LinearRegression()
+    model = linear_model.LinearRegression()
     model.fit(X_train, y_train)
 
     # Now you can predict timeSpent for new issues
