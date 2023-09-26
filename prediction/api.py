@@ -31,6 +31,7 @@ def create_issues(request, issues: List[IssueSchema]):
                 'user': request.auth,
             }
         )
+        
     return {"success": True}
 
 
