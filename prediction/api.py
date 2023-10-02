@@ -55,6 +55,11 @@ def predict_issues(request, new_issues: List[IssueInSchema]):
 
 
 def make_predictions(issues: List[IssueSchema], new_issues: List[IssueInSchema]):
+    if len(issues) <= 1:
+        for i in range(len(new_issues)):
+            new_issues[i].timeSpent = 0
+        return new_issues
+
     # Prepare the data for training
     X_train = [[issue.estimation, (datetime.now(timezone.utc) - issue.completedDate).days] for issue in issues]
 
