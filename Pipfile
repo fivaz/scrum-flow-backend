@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 django = "*"
 python-dotenv = "*"
+psycopg2 = "*"
 psycopg2-binary = "*"
 django-ninja = "*"
 jiraone = "*"
@@ -16,5 +17,5 @@ scikit-learn = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.11"
-python_full_version = "3.11.5"
+python_version = "3.9"
+python_full_version = "3.9.6"
