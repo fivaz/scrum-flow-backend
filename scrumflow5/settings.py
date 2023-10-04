@@ -65,6 +65,7 @@ CACHES = {
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://scrum-flow.vercel.app'
 ]
 
 ROOT_URLCONF = "scrumflow5.urls"
