@@ -4,6 +4,7 @@ from typing import List
 import requests
 from ninja import Router
 from sklearn import linear_model
+from urllib.parse import unquote
 
 from prediction.models import Issue
 from prediction.schema import IssueSchema, IssueInSchema
@@ -13,8 +14,18 @@ router = Router()
 
 
 @router.get("/", response=List[IssueSchema], auth=BearerToken())
-def get_schedules(request):
-    issues = Issue.objects.filter(user=request.auth)
+def get_schedules(request, issues_param: str = None):
+    if issues_param:
+        # Decode the URL-encoded string and remove leading and trailing '[' and ']'
+        decoded_issues = unquote(issues_param).strip('[]')
+
+        # Split the string by ',' and convert each element to an integer
+        issues = [int(issue) for issue in decoded_issues.split(',')]
+
+        # Filter Issue objects based on the list of issue IDs
+        issues = Issue.objects.filter(user=request.auth, id__in=issues)
+    else:
+        issues = Issue.objects.filter(user=request.auth)
     return issues.values()
 
 
