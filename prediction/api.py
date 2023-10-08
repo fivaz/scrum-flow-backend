@@ -14,16 +14,16 @@ router = Router()
 
 
 @router.get("/", response=List[IssueSchema], auth=BearerToken())
-def get_schedules(request, issues_param: str = None):
-    if issues_param:
+def get_schedules(request, issuesIn: str = None):
+    if issuesIn:
         # Decode the URL-encoded string and remove leading and trailing '[' and ']'
-        decoded_issues = unquote(issues_param).strip('[]')
+        decoded_issues = unquote(issuesIn).strip('[]')
 
         # Split the string by ',' and convert each element to an integer
-        issues = [int(issue) for issue in decoded_issues.split(',')]
+        issues = [int(issue.strip('"')) for issue in decoded_issues.split(',')]
 
         # Filter Issue objects based on the list of issue IDs
-        issues = Issue.objects.filter(user=request.auth, id__in=issues)
+        issues = Issue.objects.filter(user=request.auth, id=issues)
     else:
         issues = Issue.objects.filter(user=request.auth)
     return issues.values()
