@@ -23,7 +23,7 @@ def get_schedules(request, issuesIn: str = None):
         issues = [int(issue.strip('"')) for issue in decoded_issues.split(',')]
 
         # Filter Issue objects based on the list of issue IDs
-        issues = Issue.objects.filter(user=request.auth, id=issues)
+        issues = Issue.objects.filter(user=request.auth, id__in=issues)
     else:
         issues = Issue.objects.filter(user=request.auth)
     return issues.values()
