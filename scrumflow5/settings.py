@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-_&s&gk4c2+1dfz==vo-mal7=rkfsv_b%_h4!fm$g4tmex5gp##
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['scrum-flow-backend-58568e5a4e76.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
