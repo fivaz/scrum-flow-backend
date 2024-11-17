@@ -17,7 +17,16 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-COPY . /app/
+COPY . .
+
+# Copy the entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
+
+# Define the entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Expose the port Django runs on
 EXPOSE 8000
