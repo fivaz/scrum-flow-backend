@@ -7,3 +7,8 @@ api = NinjaAPI()
 
 api.add_router("/schedules/", schedule_router)
 api.add_router("/issues/", issue_router)
+
+# Health check route
+@api.get("/health")
+def health_check(request):
+    return {"status": "ok"}
