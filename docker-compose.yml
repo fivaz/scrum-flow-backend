@@ -1,25 +1,31 @@
-services:
-  db:
-    build: ./postgres
-    ports:
-      - "5433:5432"  # 👈 5432 is Postgres default port inside the container
-    environment:
-      POSTGRES_DB: ${DATABASE_NAME}          # Use environment variables from .env file
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+version: '3.9'
 
+services:
   web:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_NAME: ${DATABASE_NAME}         # Match with Django settings.py
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_HOST: db                       # db is the name of the DB container
-      DATABASE_PORT: ${DATABASE_PORT}
+    volumes:
+      - .:/app
     depends_on:
       - db
+    environment:
+      - DEBUG=1
+    env_file:
+      - .env  # Reference to your .env file
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: scrumflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # Map host port 5433 to container port 5432
 
 volumes:
   postgres_data:
