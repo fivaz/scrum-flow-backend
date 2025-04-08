@@ -6,9 +6,9 @@ from ninja import Router
 from sklearn import linear_model
 from urllib.parse import unquote
 
-from prediction.models import Issue
-from prediction.schema import IssueSchema, IssueInSchema
-from schedule.api import BearerToken
+from backend.prediction.models import Issue
+from backend.prediction.schema import IssueSchema, IssueInSchema
+from backend.schedule.api import BearerToken
 
 router = Router()
 

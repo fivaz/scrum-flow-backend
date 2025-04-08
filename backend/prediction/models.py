@@ -1,6 +1,6 @@
 from django.db import models
 
-from schedule.models import User
+from backend.schedule.models import User
 
 
 class Issue(models.Model):

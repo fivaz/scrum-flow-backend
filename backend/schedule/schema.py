@@ -3,7 +3,7 @@ from typing import List
 
 from ninja import Schema
 
-from schedule.models import User, Schedule
+from backend.schedule.models import User, Schedule
 
 
 class RRuleSchema(Schema):

@@ -1,7 +1,7 @@
 from ninja import NinjaAPI
 
-from prediction.api import router as issue_router
-from schedule.api import router as schedule_router
+from backend.prediction.api import router as issue_router
+from backend.schedule.api import router as schedule_router
 
 api = NinjaAPI()
 

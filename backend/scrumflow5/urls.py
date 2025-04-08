@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from scrumflow5.api import api
+from backend.scrumflow5.api import api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
