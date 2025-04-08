@@ -1,12 +1,12 @@
 # .github/workflows/deploy.yml
-name: Build and Push to Docker Hub
+name: Build and Push to Docker Hub & Trigger Render Deploy
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,15 @@ jobs:
 
       - name: Build & Push Django App
         run: |
-          docker build -t fivaz/scrumflow-backend ./backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/scrumflow-backend ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/scrumflow-backend
 
       - name: Build & Push Postgres DB
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/scrumflow-db ./postgres
           docker push ${{ secrets.DOCKER_USERNAME }}/scrumflow-db
+
+      - name: Trigger Render Deploy Hooks
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_DB }}
