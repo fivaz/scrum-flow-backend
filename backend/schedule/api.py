@@ -6,8 +6,8 @@ from jiraone import LOGIN, endpoint
 from ninja import Router
 from ninja.security import HttpBearer
 
-from backend.schedule.models import Schedule, User
-from backend.schedule.schema import ScheduleSchema, model_to_schema, ScheduleSchemaIn, schema_to_model
+from schedule.models import Schedule, User
+from schedule.schema import ScheduleSchema, model_to_schema, ScheduleSchemaIn, schema_to_model
 
 router = Router()
 
