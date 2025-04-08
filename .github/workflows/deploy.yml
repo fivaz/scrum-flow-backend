@@ -23,12 +23,6 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/scrumflow-backend ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/scrumflow-backend
 
-      - name: Build & Push Postgres DB
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/scrumflow-db ./postgres
-          docker push ${{ secrets.DOCKER_USERNAME }}/scrumflow-db
-
       - name: Trigger Render Deploy Hooks
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_DB }}
