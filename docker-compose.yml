@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  db:
+    build: ./postgres
+    ports:
+      - "5433:5432"  # 👈 5432 is Postgres default port inside the container
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+
+  web:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_NAME: mydb
+      DATABASE_USER: myuser
+      DATABASE_PASSWORD: mypassword
+      DATABASE_HOST: db             # 👈 this must match the db service name
+      DATABASE_PORT: 5432           # ✅ use internal container port
+    depends_on:
+      - db

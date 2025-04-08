@@ -1,4 +1,6 @@
-FROM postgres:14
+# postgres/Dockerfile
+FROM postgres:15
 
-# Optionally add a script to create users/databases on startup
-# COPY init.sql /docker-entrypoint-initdb.d/
+ENV POSTGRES_DB=mydb
+ENV POSTGRES_USER=myuser
+ENV POSTGRES_PASSWORD=mypassword
