@@ -1,9 +1,10 @@
 services:
   - name: postgres-db
-    type: private
+    type: worker
     env: docker
     plan: free
     dockerContext: ./postgres
+    autoDeploy: false  # Prevent it from restarting on every git push
     envVars:
       - key: POSTGRES_DB
         value: mydb
@@ -32,3 +33,6 @@ services:
         value: false
       - key: SECRET_KEY
         value: your-secret-key
+    startCommand: >
+      sh -c "python manage.py migrate &&
+             gunicorn scrumflow5.wsgi:application --bind 0.0.0.0:8000"
