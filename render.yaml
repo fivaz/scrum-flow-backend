@@ -1,0 +1,34 @@
+services:
+  - name: postgres-db
+    type: private
+    env: docker
+    plan: free
+    dockerContext: ./postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: mydb
+      - key: POSTGRES_USER
+        value: myuser
+      - key: POSTGRES_PASSWORD
+        value: mypassword
+
+  - name: django-backend
+    type: web
+    env: docker
+    plan: free
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_NAME
+        value: mydb
+      - key: DATABASE_USER
+        value: myuser
+      - key: DATABASE_PASSWORD
+        value: mypassword
+      - key: DATABASE_HOST
+        value: postgres-db
+      - key: DATABASE_PORT
+        value: "5432"
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        value: your-secret-key
