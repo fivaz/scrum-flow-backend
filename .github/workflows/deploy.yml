@@ -21,7 +21,7 @@ jobs:
       - name: Build & Push Django App
         run: |
           docker build -t fivaz/scrumflow-backend ./backend
-          docker push ${{ secrets.DOCKER_USERNAME }}/backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/scrumflow-backend
 
       - name: Build & Push Postgres DB
         run: |

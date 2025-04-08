@@ -1,24 +1,25 @@
-version: '3'
-
 services:
   db:
     build: ./postgres
     ports:
       - "5433:5432"  # 👈 5432 is Postgres default port inside the container
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: ${DATABASE_NAME}          # Use environment variables from .env file
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
 
   web:
     build: ./backend
     ports:
       - "8000:8000"
     environment:
-      DATABASE_NAME: mydb
-      DATABASE_USER: myuser
-      DATABASE_PASSWORD: mypassword
-      DATABASE_HOST: db             # 👈 this must match the db service name
-      DATABASE_PORT: 5432           # ✅ use internal container port
+      DATABASE_NAME: ${DATABASE_NAME}         # Match with Django settings.py
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: db                       # db is the name of the DB container
+      DATABASE_PORT: ${DATABASE_PORT}
     depends_on:
       - db
+
+volumes:
+  postgres_data:
