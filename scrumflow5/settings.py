@@ -24,12 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-_&s&gk4c2+1dfz==vo-mal7=rkfsv_b%_h4!fm$g4tmex5gp##"
+SECRET_KEY = os.getenv("SECRET_KEY",'S3CR3T')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() in ("1", "true", "yes")
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.sfivaz.com', '0.0.0.0', 'scrumflow-backend.onrender.com', 'scrum-flow-backend-td51.onrender.com']
+# Comma-separated hosts in env, with sensible defaults for local dev
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,0.0.0.0"
+).split(",") if h.strip()]
 
 # Application definition
 
@@ -63,11 +67,10 @@ CACHES = {
     }
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://scrum-flow.vercel.app',
-    'https://scrum-flow.sfivaz.com'
-]
+CORS_ALLOWED_ORIGINS = [o.strip() for o in os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000"
+).split(",") if o.strip()]
 
 ROOT_URLCONF = "scrumflow5.urls"
 
