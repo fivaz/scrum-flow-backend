@@ -1,60 +1,127 @@
-# Scrum Flow Backend
+# Scrum-Flow Backend
 
-Backend service for Scrum-Flow, providing Jira data ingestion, analytics, and ML-powered sprint predictions. It exposes REST APIs consumed by the frontend to deliver estimation accuracy insights, progress tracking, and planning support.
+Backend service for **Scrum-Flow**, powering Jira data ingestion, analytics, and **ML-driven sprint predictions**.  
+This REST API is consumed by the [Scrum-Flow Frontend](https://scrum-flow.sfivaz.com/demo) to provide **estimation-accuracy insights**, progress tracking, and predictive planning for Scrum teams.
 
-- Jira integration (OAuth or token-based)
-- Analytics endpoints for estimation accuracy and team progress
-- ML predictions for upcoming sprint workload
-- Production-ready Docker setup (uWSGI) and PostgreSQL support
-
-Frontend project for reference:
-- Live Demo: https://scrum-flow.sfivaz.com/demo
-- Thesis Documentation (Bachelor): https://drive.google.com/file/d/1EY82UGGvyxoVaD3mCsQSy2KbAo3Hs4U1/view
+📖 **Bachelor Thesis Documentation:** [Read the Thesis](https://drive.google.com/file/d/1EY82UGGvyxoVaD3mCsQSy2KbAo3Hs4U1/view)
 
 ---
 
-## Features
-
-- Jira data synchronization and normalization
-- Estimation accuracy metrics and time-series analytics
-- Sprint prediction endpoints (e.g., estimated effort/time)
-- Admin interface for operational tasks
-- Healthcheck and logging for observability
-
----
-
-## Tech Stack
-
-- Language: Python 3.x
-- Framework: Django (REST API)
-- Database: PostgreSQL
-- ML/Analytics: Python ecosystem
-- App Server: uWSGI
-- Containerization: Docker & Docker Compose
-- Deployment: Docker, Procfile-compatible, AWS-ready
+## 🚀 Features
+- **Jira Integration (OAuth)** – Secure Atlassian OAuth flow to automatically fetch and normalize sprint/issue data.  
+- **Analytics Endpoints** – Estimation accuracy metrics, team progress time-series, and historical sprint analysis.  
+- **ML Predictions** – Machine-learning models to forecast workload and sprint duration.  
+- **Admin & Ops Tools** – Django admin for operational tasks, plus health-check and structured logging for observability.  
+- **Production-Ready** – uWSGI/Gunicorn, Docker, and PostgreSQL setup for scalable deployments.
 
 ---
 
-## Environment Variables
+## 🛠️ Tech Stack
+- **Language:** Python 3.x  
+- **Framework:** Django REST Framework  
+- **Database:** PostgreSQL  
+- **ML / Analytics:** Python ecosystem (pandas, scikit-learn, etc.)  
+- **App Server:** Gunicorn (with uWSGI compatibility)  
+- **Containerization & Deployment:** Docker, Docker Compose, Procfile-compatible (Heroku / Render), AWS-ready
 
-Create a `.env` file at the project root (you can use `.env.example` as a reference):
+---
 
-Required keys:
-- SECRET_KEY
-- DEBUG (True/False)
-- ALLOWED_HOSTS (comma-separated)
-- CORS_ALLOWED_ORIGINS (comma-separated)
-- DATABASE_HOST, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_PORT
+## 📦 Installation
 
-Example local values:
 
-SECRET_KEY=change-me
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-CORS_ALLOWED_ORIGINS=http://localhost:3000
+### 1️⃣ Run with Docker
+
+The project includes a production-ready Dockerfile.
+
+Build and run the container:
+
+#### Build the image (tag it for clarity)
+```bash
+
+docker build -t scrum-flow-backend .
+
+```
+
+#### Run the container, mapping port 8000
+```bash
+
+docker run -d \
+  --name scrum-flow-backend \
+  -p 8000:8000 \
+  --env-file .env \
+  scrum-flow-backend
+```
+
+The container will automatically:
+	•	Apply migrations
+	•	Start the Gunicorn server bound to 0.0.0.0:8000
+
+Access the API at: http://localhost:8000
+
+⸻
+
+### 2️⃣ Local Development (Virtualenv)
+
+```bash
+
+git clone https://github.com/yourusername/scrum-flow-backend.git
+cd scrum-flow-backend
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+```
+
+Create a .env file at the project root (see .env.example for guidance):
+
+```bash
+
+SECRET_KEY=your_secret_key
+DEBUG=False
+ALLOWED_HOSTS=yourdomain.com
+CORS_ALLOWED_ORIGINS=https://scrum-flow.sfivaz.com
 
 DATABASE_HOST=localhost
 DATABASE_NAME=scrumflow
-DATABASE_USER=user
-DATABASE_PASSWORD=password
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your_password
 DATABASE_PORT=5432
+
+```
+
+Run migrations and start the server:
+
+```bash
+
+python manage.py migrate
+python manage.py runserver
+
+```
+
+⸻
+
+## 🌐 API Overview
+
+Access the API documentation at: http://localhost:8000/api/docs
+
+⸻
+
+## 🧩 How It Works
+	1.	Frontend authenticates with Jira (OAuth).
+	2.	Backend ingests and normalizes sprint & issue data.
+	3.	Analytics engine computes estimation accuracy and time-series metrics.
+	4.	ML module forecasts upcoming sprint workload, returning predictions to the frontend dashboards.
+
+⸻
+
+## 🤝 Contribution
+
+Contributions are welcome!
+Open an issue or submit a pull request to propose improvements.
+
+⸻
+
+## 📜 License
+
+Licensed under the MIT License – see the LICENSE file for details.
