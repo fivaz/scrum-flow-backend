@@ -20,7 +20,7 @@ This REST API is consumed by the [Scrum-Flow Frontend](https://scrum-flow.sfivaz
 - **Language:** Python 3.x  
 - **Framework:** Django REST Framework  
 - **Database:** PostgreSQL  
-- **ML / Analytics:** Python ecosystem (pandas, scikit-learn, etc.)  
+- **ML / Analytics:** scikit-learn (LinearRegression), NumPy, SciPy  
 - **App Server:** Gunicorn (with uWSGI compatibility)  
 - **Containerization & Deployment:** Docker, Docker Compose, Procfile-compatible (Heroku / Render), AWS-ready
 
